@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-multipart
+requests
+zenml[server]
+mlflow
+tensorflow
+opencv-python
+pytesseract
+streamlit
+datasets
+pillow
