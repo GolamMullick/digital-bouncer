@@ -1,0 +1,7 @@
+# Ignore Datasets and Images
+dataset/
+data/
+*.jpg
+*.jpeg
+*.png
+*.pem
