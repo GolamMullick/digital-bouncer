@@ -1,0 +1,40 @@
+name: Deploy to EC2 with Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH into EC2 and Deploy Docker Container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Clone if repo doesn't exist yet on server, otherwise pull
+            if [ ! -d "digital-bouncer-api" ]; then
+              git clone https://github.com/${{ github.repository }}.git digital-bouncer-api
+            fi
+            
+            cd digital-bouncer-api
+            git pull origin main
+            
+            # Build Docker Image
+            sudo docker build -t digital-bouncer .
+            
+            # Stop old container if running
+            sudo docker stop bouncer-container || true
+            sudo docker rm bouncer-container || true
+            
+            # Run new container with AWS credentials injected
+            sudo docker run -d --name bouncer-container -p 8000:8000 --restart unless-stopped \
+              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+              -e AWS_DEFAULT_REGION="us-east-1" \
+              digital-bouncer
