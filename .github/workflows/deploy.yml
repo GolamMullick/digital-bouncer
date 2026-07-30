@@ -25,6 +25,9 @@ jobs:
             cd digital-bouncer-api
             git pull origin main
             
+            # Clean up old Docker files to free up space
+            sudo docker system prune -af
+            
             # Build Docker Image
             sudo docker build -t digital-bouncer .
             
